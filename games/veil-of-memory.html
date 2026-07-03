@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veil of Memory - Filipino Folklore Card Game</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ============================================
+   TOKENS — grounded in Philippine folklore:
+   forest-night black-green, capiz-shell pale,
+   anting-anting candle gold, dried-blood red.
+============================================ */
+:root {
+  --bg-deep: #0B1410;
+  --surface: #16241C;
+  --surface-raised: #1E2F24;
+  --line: #33453A;
+  --gold: #C9A24B;
+  --gold-bright: #E8C468;
+  --blood: #9A3B3B;
+  --blood-bright: #C2544F;
+  --capiz: #E8E4D6;
+  --mist: #8B9A8E;
+  --shield-blue: #4E7A82;
+
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Work Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(201, 162, 75, 0.08), transparent 60%),
+    linear-gradient(180deg, #0D1712 0%, var(--bg-deep) 100%);
+  min-height: 100vh;
+  color: var(--capiz);
+  overflow-x: hidden;
+}
+
+button { font-family: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+/* woven "sawali" texture strip used as a signature divider */
+.weave {
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    45deg, var(--gold) 0 6px, transparent 6px 12px
+  );
+  opacity: 0.35;
+}
+
+.scene { display: none; min-height: 100vh; padding: 20px; }
+.scene.active { display: block; }
+
+/* ============================================
+   MAIN MENU
+============================================ */
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.game-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(2.75rem, 8vw, 4.5rem);
+  color: var(--gold-bright);
+  text-shadow: 0 0 40px rgba(232, 196, 104, 0.35);
+  letter-spacing: 0.01em;
+}
+
+.game-subtitle {
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--mist);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.menu-weave { width: 120px; margin: 2rem auto; }
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 240px;
+}
+
+.btn {
+  padding: 14px 32px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--surface-raised);
+  color: var(--capiz);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--surface);
+  transform: translateY(-2px);
+}
+
+.btn-gold {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #1A1305;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-gold:hover:not(:disabled) {
+  background: linear-gradient(180deg, #F2D585, var(--gold-bright));
+  transform: translateY(-2px);
+}
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ============================================
+   SETTINGS
+============================================ */
+.settings {
+  max-width: 520px;
+  margin: 0 auto;
+  padding-top: 8vh;
+}
+
+.settings h2, .character-selection h2, .game-over h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 2.25rem;
+  color: var(--gold-bright);
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.setting-group {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.setting-item:last-child { margin-bottom: 0; }
+
+.setting-item label { font-size: 0.95rem; color: var(--capiz); }
+
+.volume-control { display: flex; align-items: center; gap: 14px; }
+
+.volume-slider {
+  width: 150px;
+  height: 4px;
+  background: var(--line);
+  border-radius: 5px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-value {
+  font-family: var(--font-mono);
+  color: var(--gold);
+  font-size: 0.85rem;
+  min-width: 38px;
+  text-align: center;
+}
+
+.back-btn { margin-top: 24px; width: 100%; }
+
+/* ============================================
+   CHARACTER SELECTION
+============================================ */
+.character-selection { text-align: center; padding-top: 5vh; max-width: 1080px; margin: 0 auto; }
+
+.players-container {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.player-selection { flex: 1; min-width: 320px; max-width: 460px; }
+
+.player-title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--mist);
+  margin-bottom: 16px;
+}
+
+.characters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.character-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 14px 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  text-align: center;
+}
+
+.character-card:hover:not(.taken) {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+}
+
+.character-card.selected {
+  border-color: var(--gold-bright);
+  background: rgba(201, 162, 75, 0.14);
+  box-shadow: 0 0 18px rgba(201, 162, 75, 0.25);
+}
+
+.character-card.taken {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.character-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+.character-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--capiz);
+}
+
+.selected-character {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold-bright);
+  min-height: 1.2rem;
+}
+
+.start-game-btn { margin-top: 20px; font-size: 1.05rem; padding: 16px 48px; }
+
+/* ============================================
+   GAME SCENE
+============================================ */
+.game-scene { max-width: 900px; margin: 0 auto; }
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.player-info { text-align: center; flex: 1; min-width: 140px; }
+
+.player-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--gold-bright);
+  margin-bottom: 8px;
+}
+
+.player-stats { display: flex; flex-direction: column; gap: 6px; align-items: center; font-size: 0.8rem; color: var(--mist); }
+
+.player-stats .stat-value { font-family: var(--font-mono); color: var(--capiz); }
+
+.hp-bar {
+  width: 140px;
+  height: 10px;
+  background: var(--bg-deep);
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  transition: width 0.5s ease, background 0.3s ease;
+}
+
+.hp-fill.low { background: linear-gradient(90deg, var(--blood), var(--blood-bright)); }
+
+.status-tags { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; min-height: 20px; }
+
+.status-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+}
+
+.game-status { text-align: center; flex: 1; min-width: 180px; }
+
+.current-turn {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: var(--capiz);
+  margin-bottom: 8px;
+}
+
+.dice-result { font-family: var(--font-mono); font-size: 0.85rem; color: var(--mist); margin-bottom: 6px; }
+.combo-display { font-family: var(--font-mono); font-size: 0.85rem; color: var(--gold-bright); font-weight: 500; }
+
+.battle-log {
+  min-height: 1.1rem;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--blood-bright);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.game-card {
+  aspect-ratio: 1;
+  background:
+    repeating-linear-gradient(45deg, #223227 0 4px, #1B2820 4px 8px);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.game-card:hover:not(.matched):not(.frozen) {
+  transform: translateY(-3px);
+  border-color: var(--gold);
+}
+
+.game-card.flipped {
+  background: var(--surface-raised);
+  border-color: var(--gold-bright);
+}
+
+.game-card.matched {
+  background: rgba(201, 162, 75, 0.12);
+  border-color: var(--gold);
+  cursor: default;
+  box-shadow: 0 0 14px rgba(232, 196, 104, 0.2);
+}
+
+.game-card.frozen {
+  background: rgba(78, 122, 130, 0.18);
+  border-color: var(--shield-blue);
+  cursor: not-allowed;
+}
+
+.card-back { font-size: 1.5rem; color: var(--mist); opacity: 0.6; }
+
+.ability-cards {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  min-height: 40px;
+}
+
+.ability-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 10px 14px 12px;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+  text-align: center;
+  min-width: 108px;
+}
+
+.ability-card:hover { border-color: var(--gold-bright); transform: translateY(-2px); }
+.ability-card.used { opacity: 0.4; }
+
+.ability-name { font-size: 0.78rem; font-weight: 600; color: var(--capiz); margin-bottom: 3px; }
+.ability-description { font-family: var(--font-mono); font-size: 0.62rem; color: var(--mist); margin-bottom: 8px; }
+
+.ability-use-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 5px 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: transparent;
+  color: var(--gold-bright);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ability-use-btn:hover {
+  background: var(--gold);
+  color: #1A1305;
+}
+
+.ability-use-btn .use-icon { font-size: 0.85rem; }
+
+.game-controls { text-align: center; }
+
+.roll-dice-btn { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #1A1305; border: none; margin-right: 14px; }
+.end-turn-btn { background: var(--surface-raised); border-color: var(--blood); color: var(--blood-bright); }
+.end-turn-btn:hover:not(:disabled) { border-color: var(--blood-bright); }
+
+/* ============================================
+   GAME OVER
+============================================ */
+.game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.winner-info { font-size: 1.15rem; color: var(--gold-bright); margin-bottom: 28px; }
+
+.final-scores {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 24px 32px;
+  margin-bottom: 28px;
+  min-width: 300px;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--mist);
+}
+
+.score-item span:first-child { color: var(--capiz); font-family: var(--font-body); }
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 720px) {
+  .cards-grid { grid-template-columns: repeat(4, 1fr); }
+  .characters-grid { grid-template-columns: repeat(4, 1fr); }
+  .game-header { flex-direction: column; align-items: stretch; }
+  .player-info { order: 2; }
+  .game-status { order: 1; }
+}
+
+@media (max-width: 480px) {
+  .cards-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .hp-bar { width: 110px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Main Menu Scene -->
+<div id="mainMenu" class="scene active">
+  <div class="main-menu">
+    <h1 class="game-title">Veil of Memory</h1>
+    <p class="game-subtitle">A Filipino Folklore Card Game</p>
+    <div class="weave menu-weave"></div>
+    <div class="menu-buttons">
+      <button class="btn btn-gold" onclick="showCharacterSelection()">Play</button>
+      <button class="btn" onclick="showSettings()">Settings</button>
+      <button class="btn" onclick="quitGame()">Quit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Scene -->
+<div id="settings" class="scene">
+  <div class="settings">
+    <h2>Settings</h2>
+    <div class="setting-group">
+      <div class="setting-item">
+        <label for="musicVolume">Music Volume</label>
+        <div class="volume-control">
+          <input type="range" class="volume-slider" id="musicVolume" min="0" max="100" value="50">
+          <span class="volume-value" id="musicVolumeValue">50%</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label for="soundVolume">Sound Effects</label>
+        <div class="volume-control">
+          <input type="range" class="volume-slider" id="soundVolume" min="0" max="100" value="70">
+          <span class="volume-value" id="soundVolumeValue">70%</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn back-btn" onclick="showMainMenu()">Back to Main Menu</button>
+  </div>
+</div>
+
+<!-- Character Selection Scene -->
+<div id="characterSelection" class="scene">
+  <div class="character-selection">
+    <h2>Choose Your Characters</h2>
+    <div class="players-container">
+      <div class="player-selection">
+        <h3 class="player-title">Player 1</h3>
+        <div class="characters-grid" id="player1Characters"></div>
+        <div id="player1Selected" class="selected-character"></div>
+      </div>
+      <div class="player-selection">
+        <h3 class="player-title">Player 2</h3>
+        <div class="characters-grid" id="player2Characters"></div>
+        <div id="player2Selected" class="selected-character"></div>
+      </div>
+    </div>
+    <button class="btn btn-gold start-game-btn" id="startGameBtn" onclick="startGame()" disabled>Start Game</button>
+    <button class="btn back-btn" onclick="showMainMenu()" style="margin-top: 14px; max-width: 300px; margin-left: auto; margin-right: auto;">Back</button>
+  </div>
+</div>
+
+<!-- Game Scene -->
+<div id="gameScene" class="scene">
+  <div class="game-scene">
+    <div class="game-header">
+      <div class="player-info">
+        <div class="player-name" id="player1Name">Player 1</div>
+        <div class="player-stats">
+          <div>HP <span class="stat-value" id="player1HP">100</span></div>
+          <div class="hp-bar"><div class="hp-fill" id="player1HPBar" style="width: 100%"></div></div>
+          <div>Score <span class="stat-value" id="player1Score">0</span></div>
+          <div class="status-tags" id="player1Status"></div>
+        </div>
+      </div>
+
+      <div class="game-status">
+        <div class="current-turn" id="currentTurn">Player 1's Turn</div>
+        <div class="dice-result" id="diceResult">Roll dice to start!</div>
+        <div class="combo-display" id="comboDisplay">Combo: 0</div>
+        <div class="battle-log" id="battleLog"></div>
+      </div>
+
+      <div class="player-info">
+        <div class="player-name" id="player2Name">Player 2</div>
+        <div class="player-stats">
+          <div>HP <span class="stat-value" id="player2HP">100</span></div>
+          <div class="hp-bar"><div class="hp-fill" id="player2HPBar" style="width: 100%"></div></div>
+          <div>Score <span class="stat-value" id="player2Score">0</span></div>
+          <div class="status-tags" id="player2Status"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <p style="text-align:center; font-family: var(--font-mono); font-size: 0.68rem; color: var(--mist); margin-bottom: 10px;">
+      Tactical amulets — click to use on your turn
+    </p>
+    <div class="ability-cards" id="abilityCards"></div>
+
+    <div class="game-controls">
+      <button class="btn roll-dice-btn" id="rollDiceBtn" onclick="rollDice()">Roll Dice</button>
+      <button class="btn end-turn-btn" id="endTurnBtn" onclick="endTurn()" style="display: none;">End Turn</button>
+      <button class="btn back-btn" onclick="showMainMenu()" style="display:inline-block; width:auto; margin-left: 14px;">Back to Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game Over Scene -->
+<div id="gameOver" class="scene">
+  <div class="game-over">
+    <h2>Game Over</h2>
+    <div class="winner-info" id="winnerInfo"></div>
+    <div class="final-scores" id="finalScores"></div>
+    <div>
+      <button class="btn btn-gold play-again-btn" onclick="resetGame()" style="display:inline-block; width:auto; margin-right: 14px;">Play Again</button>
+      <button class="btn back-btn" onclick="showMainMenu()" style="display:inline-block; width:auto;">Main Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// GAME STATE
+// ============================================
+let gameState = {
+  currentPlayer: 1,
+  players: {
+    1: { name: 'Player 1', character: null, characterIndex: null, hp: 100, score: 0,
+         abilities: [], shield: false, silenced: false, skipTurn: false },
+    2: { name: 'Player 2', character: null, characterIndex: null, hp: 100, score: 0,
+         abilities: [], shield: false, silenced: false, skipTurn: false }
+  },
+  cards: [],
+  flippedCards: [],
+  frozenCards: [],
+  frozenOwner: null,     // player number who is currently hampered by frozen cards
+  combo: 0,
+  rollModifier: 0,       // damage modifier from this turn's dice roll
+  gameStarted: false,
+  turnStarted: false
+};
+
+// Characters data — each has a passive power drawn from their folklore role
+const characters = [
+  { name: 'Aswang', icon: '🐺', description: 'Feared shapeshifter',
+    passiveName: 'Feral Instinct', passiveDesc: '+3 damage on all attacks' },
+  { name: 'Manananggal', icon: '🩸', description: 'Cursed sister',
+    passiveName: 'Self-Regeneration', passiveDesc: 'Heal restores 20 HP instead of 15' },
+  { name: 'Kapre', icon: '🦶', description: 'Tree-dwelling spirit',
+    passiveName: 'Thick Bark Hide', passiveDesc: 'Takes 3 less damage from every hit' },
+  { name: 'Tiyanak', icon: '👶', description: 'Malevolent baby spirit',
+    passiveName: 'Deceiving Wail', passiveDesc: '+5 bonus points on every combo' },
+  { name: 'Diwata', icon: '🧚', description: 'Guardian of nature',
+    passiveName: "Nature's Blessing", passiveDesc: 'Starts the match with a shield raised' },
+  { name: 'White Lady', icon: '👻', description: 'Sorrowful ghost',
+    passiveName: 'Haunting Wail', passiveDesc: "Silence also resets the opponent's combo" },
+  { name: 'Duwende', icon: '🧙', description: 'Earth-dwelling trickster',
+    passiveName: "Trickster's Luck", passiveDesc: 'Dice roll always adds +1 damage bonus' },
+  { name: 'Multo', icon: '💀', description: 'Restless warrior spirit',
+    passiveName: 'Vengeful Spirit', passiveDesc: '+10 damage once below 30 HP' }
+];
+
+// Ability cards — Strike / Blast / Burn / Curse resolve instantly on match.
+// Block / Still / Show / Shield / Silence / Heal are held and activated manually.
+// Special and Agimat are bonus-points amulets, not abilities.
+const abilities = [
+  { name: 'Block', description: "Skip opponent's next turn", icon: '❌' },
+  { name: 'Still', description: 'Freeze 2 opponent cards', icon: '❄️' },
+  { name: 'Show', description: 'Reveal all cards briefly', icon: '👁️' },
+  { name: 'Shield', description: 'Block the next hit', icon: '🛡️' },
+  { name: 'Heal', description: 'Restore 15 HP', icon: '🌿' },
+  { name: 'Burn', description: 'Deals 15 damage', icon: '🔥' },
+  { name: 'Curse', description: 'Deals 10 damage', icon: '🕸️' },
+  { name: 'Silence', description: "Nullify opponent's next attack", icon: '🤐' },
+  { name: 'Strike', description: 'Deals 20 damage', icon: '⚔️' },
+  { name: 'Blast', description: 'Deals 30 damage', icon: '💥' }
+];
+
+const damagingAbilities = { Strike: 20, Blast: 30, Burn: 15, Curse: 10, Bite: 12, Drain: 8 };
+const lifestealAbilities = ['Drain']; // damaging cards that also heal the attacker on a landed hit
+const tacticalAbilities = ['Block', 'Still', 'Show', 'Shield', 'Silence', 'Heal'];
+const bonusTypes = ['Special', 'Agimat', 'Ritual'];
+const bonusValues = { Special: 25, Agimat: 25, Ritual: 40 };
+
+const cardIcons = {
+  Block: '❌', Still: '❄️', Show: '👁️', Shield: '🛡️', Heal: '🌿',
+  Burn: '🔥', Curse: '🕸️', Silence: '🤐', Strike: '⚔️', Blast: '💥',
+  Special: '✨', Agimat: '🧿', Bite: '🦷', Drain: '🧛', Ritual: '🕯️'
+};
+
+function getCardIcon(type) {
+  return cardIcons[type] || '❓';
+}
+
+function getAbilityInfo(name) {
+  return abilities.find(a => a.name === name);
+}
+
+// ============================================
+// CHARACTER SELECTION
+// ============================================
+function initializeCharacterSelection() {
+  const player1Grid = document.getElementById('player1Characters');
+  const player2Grid = document.getElementById('player2Characters');
+
+  player1Grid.innerHTML = '';
+  player2Grid.innerHTML = '';
+
+  characters.forEach((character, index) => {
+    [1, 2].forEach(player => {
+      const grid = player === 1 ? player1Grid : player2Grid;
+      const card = document.createElement('div');
+      card.className = 'character-card';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', `Choose ${character.name} for Player ${player}`);
+      card.title = `${character.passiveName}: ${character.passiveDesc}`;
+      card.innerHTML = `
+        <div class="character-icon">${character.icon}</div>
+        <div class="character-name">${character.name}</div>
+      `;
+      const activate = () => selectCharacter(player, index);
+      card.onclick = activate;
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+      });
+      grid.appendChild(card);
+    });
+  });
+}
+
+function selectCharacter(player, characterIndex) {
+  const otherPlayer = player === 1 ? 2 : 1;
+
+  // Two players can't play the same spirit
+  if (gameState.players[otherPlayer].characterIndex === characterIndex) return;
+
+  const grid = document.getElementById(`player${player}Characters`);
+  const cards = grid.querySelectorAll('.character-card');
+  cards.forEach(card => card.classList.remove('selected'));
+  cards[characterIndex].classList.add('selected');
+
+  gameState.players[player].character = characters[characterIndex];
+  gameState.players[player].characterIndex = characterIndex;
+  gameState.players[player].name = characters[characterIndex].name;
+
+  const chosen = characters[characterIndex];
+  document.getElementById(`player${player}Selected`).innerHTML =
+    `Selected: ${chosen.name} ${chosen.icon}<br>` +
+    `<span style="color:var(--mist); font-size:0.68rem;">${chosen.passiveName} — ${chosen.passiveDesc}</span>`;
+
+  markTakenCharacter(otherPlayer, characterIndex);
+  checkStartGameReady();
+}
+
+function markTakenCharacter(player, index) {
+  const grid = document.getElementById(`player${player}Characters`);
+  const cards = grid.querySelectorAll('.character-card');
+  cards.forEach((card, i) => {
+    if (i === index && gameState.players[player].characterIndex !== index) {
+      card.classList.add('taken');
+    } else if (gameState.players[player].characterIndex !== i) {
+      card.classList.remove('taken');
+    }
+  });
+}
+
+function checkStartGameReady() {
+  const startBtn = document.getElementById('startGameBtn');
+  startBtn.disabled = !(gameState.players[1].character && gameState.players[2].character);
+}
+
+// ============================================
+// BOARD SETUP
+// ============================================
+function initializeCards() {
+  gameState.cards = [];
+  const cardTypes = ['Block', 'Still', 'Show', 'Shield', 'Heal', 'Burn', 'Curse', 'Silence', 'Strike', 'Blast', 'Special', 'Agimat', 'Bite', 'Drain', 'Ritual'];
+
+  cardTypes.forEach(type => {
+    gameState.cards.push({ type, flipped: false, matched: false });
+    gameState.cards.push({ type, flipped: false, matched: false });
+  });
+
+  for (let i = gameState.cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [gameState.cards[i], gameState.cards[j]] = [gameState.cards[j], gameState.cards[i]];
+  }
+
+  renderCards();
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+
+  gameState.cards.forEach((card, index) => {
+    const el = document.createElement('div');
+    el.className = 'game-card';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+
+    const isFrozen = gameState.frozenCards.includes(index) && gameState.currentPlayer === gameState.frozenOwner;
+
+    if (card.flipped || card.matched) {
+      el.classList.add('flipped');
+      el.innerHTML = getCardIcon(card.type);
+    } else {
+      el.innerHTML = '<div class="card-back">🌙</div>';
+    }
+
+    if (card.matched) {
+      el.classList.add('matched');
+    } else if (isFrozen) {
+      el.classList.add('frozen');
+      el.setAttribute('aria-label', 'Frozen card, cannot be flipped this turn');
+    } else {
+      const activate = () => flipCard(index);
+      el.onclick = activate;
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+      });
+    }
+
+    grid.appendChild(el);
+  });
+}
+
+// ============================================
+// TURN FLOW
+// ============================================
+function rollDice() {
+  if (gameState.turnStarted) return;
+  const dice1 = Math.floor(Math.random() * 6) + 1;
+  const dice2 = Math.floor(Math.random() * 6) + 1;
+  const total = dice1 + dice2;
+
+  // 7 is the average roll — anything above/below it nudges this turn's damage
+  gameState.rollModifier = total - 7;
+  if (gameState.players[gameState.currentPlayer].character?.name === 'Duwende') {
+    gameState.rollModifier += 1;
+  }
+  const modLabel = gameState.rollModifier === 0
+    ? 'no damage bonus'
+    : `${gameState.rollModifier > 0 ? '+' : ''}${gameState.rollModifier} damage this turn`;
+
+  document.getElementById('diceResult').textContent =
+    `Rolled: ${dice1} + ${dice2} = ${total} (${modLabel})`;
+  document.getElementById('rollDiceBtn').style.display = 'none';
+  document.getElementById('endTurnBtn').style.display = 'inline-block';
+
+  gameState.turnStarted = true;
+  gameState.flippedCards = [];
+}
+
+function flipCard(index) {
+  if (!gameState.turnStarted || gameState.flippedCards.length >= 2) return;
+
+  const card = gameState.cards[index];
+  if (card.flipped || card.matched) return;
+  if (gameState.frozenCards.includes(index) && gameState.currentPlayer === gameState.frozenOwner) return;
+
+  card.flipped = true;
+  gameState.flippedCards.push(index);
+  renderCards();
+
+  if (gameState.flippedCards.length === 2) {
+    setTimeout(checkMatch, 900);
+  }
+}
+
+function checkMatch() {
+  const [i1, i2] = gameState.flippedCards;
+  const card1 = gameState.cards[i1];
+  const card2 = gameState.cards[i2];
+  const player = gameState.players[gameState.currentPlayer];
+
+  if (card1.type === card2.type) {
+    card1.matched = true;
+    card2.matched = true;
+
+    gameState.combo++;
+    let points = getComboPoints(gameState.combo);
+    if (player.character?.name === 'Tiyanak') points += 5;
+    player.score += points;
+
+    if (bonusTypes.includes(card1.type)) {
+      const bonus = bonusValues[card1.type];
+      player.score += bonus;
+      showBattleMessage(`${player.name} found an amulet — +${bonus} bonus!`);
+    } else if (damagingAbilities.hasOwnProperty(card1.type)) {
+      const landed = applyDamage(card1.type, gameState.currentPlayer);
+      if (landed && lifestealAbilities.includes(card1.type)) {
+        const healed = Math.min(8, 100 - player.hp);
+        player.hp = Math.min(100, player.hp + 8);
+        showBattleMessage(`${player.name} drains life — deals 8 damage and heals ${healed} HP.`);
+      }
+    } else if (!player.abilities.includes(card1.type)) {
+      player.abilities.push(card1.type);
+      showBattleMessage(`${player.name} gained ${card1.type}.`);
+    }
+
+    updateDisplay();
+
+    if (gameState.cards.every(c => c.matched)) {
+      endGame();
+      return;
+    }
+
+    gameState.flippedCards = [];
+  } else {
+    card1.flipped = false;
+    card2.flipped = false;
+    gameState.combo = 0;
+    gameState.flippedCards = [];
+    endTurn();
+    return;
+  }
+
+  renderCards();
+}
+
+function getComboPoints(combo) {
+  switch (combo) {
+    case 1: return 10;
+    case 2: return 15;
+    case 3: return 20;
+    case 4: return 30;
+    default: return 40;
+  }
+}
+
+function endTurn() {
+  const finishedPlayer = gameState.currentPlayer;
+  const nextPlayer = finishedPlayer === 1 ? 2 : 1;
+
+  // Freeze effect expires once the hampered player's turn ends
+  if (gameState.frozenOwner === finishedPlayer) {
+    gameState.frozenCards = [];
+    gameState.frozenOwner = null;
+  }
+
+  gameState.currentPlayer = nextPlayer;
+  gameState.turnStarted = false;
+  gameState.combo = 0;
+  gameState.flippedCards = [];
+  gameState.rollModifier = 0;
+
+  document.getElementById('rollDiceBtn').style.display = 'inline-block';
+  document.getElementById('endTurnBtn').style.display = 'none';
+  document.getElementById('diceResult').textContent = 'Roll dice to start!';
+
+  if (gameState.players[nextPlayer].skipTurn) {
+    gameState.players[nextPlayer].skipTurn = false;
+    showBattleMessage(`${gameState.players[nextPlayer].name}'s turn was blocked!`);
+    updateDisplay();
+    renderCards();
+    endTurn();
+    return;
+  }
+
+  updateDisplay();
+  renderCards();
+}
+
+// ============================================
+// ABILITIES
+// ============================================
+function applyDamage(type, attacker) {
+  const defender = attacker === 1 ? 2 : 1;
+  const attackerObj = gameState.players[attacker];
+  const defenderObj = gameState.players[defender];
+
+  if (attackerObj.silenced) {
+    attackerObj.silenced = false;
+    showBattleMessage(`${attackerObj.name}'s ${type} was silenced — no effect.`);
+    return false;
+  }
+
+  if (defenderObj.shield) {
+    defenderObj.shield = false;
+    showBattleMessage(`${defenderObj.name}'s shield absorbed the ${type}!`);
+    return false;
+  }
+
+  const baseDamage = damagingAbilities[type];
+  let damage = Math.max(5, baseDamage + gameState.rollModifier);
+
+  // Aswang — Feral Instinct: +3 damage on all attacks
+  if (attackerObj.character?.name === 'Aswang') damage += 3;
+  // Multo — Vengeful Spirit: +10 damage once below 30 HP
+  if (attackerObj.character?.name === 'Multo' && attackerObj.hp <= 30) damage += 10;
+  // Kapre — Thick Bark Hide: takes 3 less damage from every hit
+  if (defenderObj.character?.name === 'Kapre') damage = Math.max(5, damage - 3);
+
+  defenderObj.hp = Math.max(0, defenderObj.hp - damage);
+  showBattleMessage(`${attackerObj.name}'s ${type} hits ${defenderObj.name} for ${damage}.`);
+
+  if (defenderObj.hp === 0) {
+    updateDisplay();
+    endGame();
+  }
+  return true;
+}
+
+function useAbility(name) {
+  const player = gameState.players[gameState.currentPlayer];
+  if (!gameState.turnStarted) return; // only usable mid-turn
+  if (!player.abilities.includes(name)) return;
+
+  const opponent = gameState.currentPlayer === 1 ? 2 : 1;
+
+  switch (name) {
+    case 'Block':
+      gameState.players[opponent].skipTurn = true;
+      showBattleMessage(`${player.name} used Block on ${gameState.players[opponent].name}.`);
+      break;
+    case 'Still': {
+      const candidates = gameState.cards
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => !c.matched && !c.flipped);
+      for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+      gameState.frozenCards = candidates.slice(0, 2).map(x => x.i);
+      gameState.frozenOwner = opponent;
+      showBattleMessage(`${player.name} froze 2 cards for ${gameState.players[opponent].name}.`);
+      break;
+    }
+    case 'Show': {
+      showBattleMessage(`${player.name} revealed the board.`);
+      const grid = document.getElementById('cardsGrid');
+      gameState.cards.forEach((c, i) => {
+        if (!c.matched) {
+          const el = grid.children[i];
+          el.classList.add('flipped');
+          el.innerHTML = getCardIcon(c.type);
+        }
+      });
+      setTimeout(() => { if (!gameState.gameOver) renderCards(); }, 3000);
+      break;
+    }
+    case 'Shield':
+      player.shield = true;
+      showBattleMessage(`${player.name} raised a shield.`);
+      break;
+    case 'Silence':
+      gameState.players[opponent].silenced = true;
+      if (player.character?.name === 'White Lady') {
+        gameState.combo = 0;
+        showBattleMessage(`${player.name}'s wail silences ${gameState.players[opponent].name} and breaks their combo!`);
+      } else {
+        showBattleMessage(`${player.name} silenced ${gameState.players[opponent].name}'s next attack.`);
+      }
+      break;
+    case 'Heal': {
+      const healAmount = player.character?.name === 'Manananggal' ? 20 : 15;
+      const healed = Math.min(healAmount, 100 - player.hp);
+      player.hp = Math.min(100, player.hp + healAmount);
+      showBattleMessage(healed > 0
+        ? `${player.name} healed for ${healed} HP.`
+        : `${player.name} is already at full HP.`);
+      break;
+    }
+  }
+
+  player.abilities = player.abilities.filter(a => a !== name);
+  updateDisplay();
+}
+
+function renderAbilityCards() {
+  const container = document.getElementById('abilityCards');
+  container.innerHTML = '';
+  const player = gameState.players[gameState.currentPlayer];
+
+  player.abilities
+    .filter(name => tacticalAbilities.includes(name))
+    .forEach(name => {
+      const info = getAbilityInfo(name);
+      const el = document.createElement('div');
+      el.className = 'ability-card';
+      el.innerHTML = `
+        <div class="ability-name">${info.icon} ${info.name}</div>
+        <div class="ability-description">${info.description}</div>
+        <button class="ability-use-btn" type="button" aria-label="Use ${info.name}">
+          <span class="use-icon">✦</span> Use
+        </button>
+      `;
+      el.querySelector('.ability-use-btn').addEventListener('click', () => useAbility(name));
+      container.appendChild(el);
+    });
+}
+
+// ============================================
+// DISPLAY
+// ============================================
+function showBattleMessage(text) {
+  const log = document.getElementById('battleLog');
+  if (log) log.textContent = text;
+}
+
+function updateDisplay() {
+  document.getElementById('currentTurn').textContent = `${gameState.players[gameState.currentPlayer].name}'s Turn`;
+  document.getElementById('comboDisplay').textContent = `Combo: ${gameState.combo}`;
+
+  for (let i = 1; i <= 2; i++) {
+    const p = gameState.players[i];
+    document.getElementById(`player${i}Name`).textContent = p.name;
+    document.getElementById(`player${i}HP`).textContent = p.hp;
+    document.getElementById(`player${i}Score`).textContent = p.score;
+
+    const bar = document.getElementById(`player${i}HPBar`);
+    bar.style.width = `${p.hp}%`;
+    bar.classList.toggle('low', p.hp <= 30);
+
+    const tags = [];
+    if (p.shield) tags.push('Shielded');
+    if (p.silenced) tags.push('Silenced');
+    if (p.skipTurn) tags.push('Blocked');
+    document.getElementById(`player${i}Status`).innerHTML =
+      tags.map(t => `<span class="status-tag">${t}</span>`).join('');
+  }
+
+  renderAbilityCards();
+}
+
+// ============================================
+// SCENE NAVIGATION
+// ============================================
+function showMainMenu() { hideAllScenes(); document.getElementById('mainMenu').classList.add('active'); }
+function showSettings() { hideAllScenes(); document.getElementById('settings').classList.add('active'); }
+function showCharacterSelection() {
+  hideAllScenes();
+  document.getElementById('characterSelection').classList.add('active');
+  initializeCharacterSelection();
+}
+function showGameScene() { hideAllScenes(); document.getElementById('gameScene').classList.add('active'); }
+function showGameOver() { hideAllScenes(); document.getElementById('gameOver').classList.add('active'); }
+function hideAllScenes() {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+}
+
+// ============================================
+// GAME LIFECYCLE
+// ============================================
+function startGame() {
+  gameState.gameStarted = true;
+  gameState.gameOver = false;
+  gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
+  [1, 2].forEach(i => {
+    gameState.players[i].hp = 100;
+    gameState.players[i].score = 0;
+    gameState.players[i].abilities = [];
+    gameState.players[i].shield = gameState.players[i].character?.name === 'Diwata';
+    gameState.players[i].silenced = false;
+    gameState.players[i].skipTurn = false;
+  });
+  gameState.combo = 0;
+  gameState.rollModifier = 0;
+  gameState.turnStarted = false;
+  gameState.frozenCards = [];
+  gameState.frozenOwner = null;
+
+  initializeCards();
+  showGameScene();
+  updateDisplay();
+}
+
+function resetGame() {
+  gameState = {
+    currentPlayer: 1,
+    players: {
+      1: { name: 'Player 1', character: null, characterIndex: null, hp: 100, score: 0,
+           abilities: [], shield: false, silenced: false, skipTurn: false },
+      2: { name: 'Player 2', character: null, characterIndex: null, hp: 100, score: 0,
+           abilities: [], shield: false, silenced: false, skipTurn: false }
+    },
+    cards: [],
+    flippedCards: [],
+    frozenCards: [],
+    frozenOwner: null,
+    combo: 0,
+    rollModifier: 0,
+    gameStarted: false,
+    turnStarted: false
+  };
+  showCharacterSelection();
+}
+
+function endGame() {
+  gameState.gameOver = true;
+  let winner = null;
+  let winCondition = '';
+
+  if (gameState.players[1].hp <= 0) {
+    winner = gameState.players[2];
+    winCondition = 'KO Victory';
+  } else if (gameState.players[2].hp <= 0) {
+    winner = gameState.players[1];
+    winCondition = 'KO Victory';
+  } else {
+    if (gameState.players[1].score > gameState.players[2].score) winner = gameState.players[1];
+    else if (gameState.players[2].score > gameState.players[1].score) winner = gameState.players[2];
+    else winner = null;
+    winCondition = 'Score Victory';
+  }
+
+  const winnerInfo = document.getElementById('winnerInfo');
+  winnerInfo.textContent = winner ? `${winner.name} wins by ${winCondition}!` : "It's a tie!";
+
+  document.getElementById('finalScores').innerHTML = `
+    <div class="score-item"><span>${gameState.players[1].name}</span><span>HP ${gameState.players[1].hp} · Score ${gameState.players[1].score}</span></div>
+    <div class="score-item"><span>${gameState.players[2].name}</span><span>HP ${gameState.players[2].hp} · Score ${gameState.players[2].score}</span></div>
+  `;
+
+  showGameOver();
+}
+
+// ============================================
+// SETTINGS
+// ============================================
+function updateVolumeDisplay() {
+  document.getElementById('musicVolumeValue').textContent = document.getElementById('musicVolume').value + '%';
+  document.getElementById('soundVolumeValue').textContent = document.getElementById('soundVolume').value + '%';
+}
+
+function quitGame() {
+  if (confirm('Are you sure you want to quit?')) {
+    // If this was opened as its own popup/tab by a script, this will actually close it.
+    window.close();
+    // Most browsers block script-initiated close on tabs the user opened directly —
+    // in that case, send them back to the portfolio home page instead.
+    setTimeout(() => {
+      if (!window.closed) window.location.href = '../index.html';
+    }, 150);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('musicVolume').addEventListener('input', updateVolumeDisplay);
+  document.getElementById('soundVolume').addEventListener('input', updateVolumeDisplay);
+  updateVolumeDisplay();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeke — Computer Science Student</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-mark">Z<span class="dot">.</span></a>
+    <nav class="nav-links">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#education">Education</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact" class="nav-cta">Contact</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <p class="eyebrow"><span class="coord">[x, y]</span> Computer Science · Cavite State University</p>
+    <h1 class="hero-title">Zeke<span class="accent">.</span></h1>
+    <p class="hero-role">BS Computer Science student, building at the edge of<br class="br-desktop"> web development, systems, and games.</p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn btn-primary">View projects</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+  </div>
+  <a href="#about" class="scroll-cue" aria-label="Scroll to about section">
+    <span class="scroll-line"></span> scroll
+  </a>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="section about" id="about">
+  <div class="section-inner">
+    <p class="label">01 — About</p>
+    <h2 class="section-title">A student who likes to trace<br>the shortest path between<br>an idea and a working build.</h2>
+    <div class="about-body">
+      <p>I'm a Computer Science student in the College of Engineering and Information Technology at Cavite State University. My work sits between web app development and software development — I like problems that have a measurable outcome and a real interface on top of them.</p>
+      <p>Outside of coursework, I'm an aspiring game developer. I'm drawn to systems that feel alive in small ways — good feedback loops, readable state, interfaces that don't get in the way. This portfolio is a placeholder scaffold; swap in your real projects, writing, and contact details whenever you're ready.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SKILLS ===== -->
+<section class="section skills" id="skills">
+  <div class="section-inner">
+    <p class="label">02 — Skills</p>
+    <h2 class="section-title">Tools I reach for.</h2>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <span class="skill-node"></span>
+        <h3>Languages</h3>
+        <p>Python · Java · C++ · JavaScript</p>
+      </div>
+      <div class="skill-card">
+        <span class="skill-node"></span>
+        <h3>Web Development</h3>
+        <p>HTML · CSS · JavaScript · React</p>
+      </div>
+      <div class="skill-card">
+        <span class="skill-node"></span>
+        <h3>Machine Learning</h3>
+        <p>PyTorch · Computer Vision · Model Training &amp; Evaluation</p>
+      </div>
+      <div class="skill-card">
+        <span class="skill-node"></span>
+        <h3>Game Development</h3>
+        <p>Unity · Game Design Fundamentals</p>
+      </div>
+      <div class="skill-card">
+        <span class="skill-node"></span>
+        <h3>Tools &amp; Platforms</h3>
+        <p>Git · GitHub · Kaggle · VS Code</p>
+      </div>
+      <div class="skill-card">
+        <span class="skill-node"></span>
+        <h3>Core CS</h3>
+        <p>Data Structures · Algorithms · Databases</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EDUCATION ===== -->
+<section class="section education" id="education">
+  <div class="section-inner">
+    <p class="label">03 — Education</p>
+    <h2 class="section-title">Where I've studied.</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-marker"><span class="coord">[x, y]</span></div>
+        <div class="timeline-content">
+          <h3>BS Computer Science</h3>
+          <p class="timeline-meta">Cavite State University — College of Engineering and Information Technology</p>
+          <p>Coursework spanning software engineering, web development, and simple game applications, with a thesis project applying computer vision to real-world posture analysis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROJECTS ===== -->
+<section class="section projects" id="projects">
+  <div class="section-inner">
+    <p class="label">04 — Projects</p>
+    <h2 class="section-title">Selected work.</h2>
+    <div class="projects-grid">
+      <article class="project-card">
+        <div class="project-top">
+          <span class="coord">01</span>
+          <span class="project-tag">Machine Learning</span>
+        </div>
+        <h3>Thesis Project</h3>
+        <p>A computer vision system for posture analysis, built by extending a pose-estimation architecture with an attention mechanism to improve keypoint accuracy.</p>
+        <div class="project-links">
+          <a href="#" class="project-link">Write-up →</a>
+          <a href="#" class="project-link">Code →</a>
+        </div>
+      </article>
+      <article class="project-card">
+        <div class="project-top">
+          <span class="coord">02</span>
+          <span class="project-tag">Web</span>
+        </div>
+        <h3>Project Title</h3>
+        <p>Short description of a web application, tool, or website you've built — what it does and what problem it solves.</p>
+        <div class="project-links">
+          <a href="#" class="project-link">Live demo →</a>
+          <a href="#" class="project-link">Code →</a>
+        </div>
+      </article>
+      <article class="project-card">
+        <div class="project-top">
+          <span class="coord">03</span>
+          <span class="project-tag">Game Dev</span>
+        </div>
+        <h3>Veil of Memory</h3>
+        <p>A two-player memory-matching battle game set in Philippine folklore. Flip cards to land attacks, tactical amulets, and score combos — each of the 8 spirit characters (Aswang, Manananggal, Diwata, and more) carries its own passive power that changes how a match plays out.</p>
+        <div class="project-links">
+          <a href="games/veil-of-memory.html" class="project-link">Play →</a>
+          <a href="#" class="project-link">Code →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="section contact" id="contact">
+  <div class="section-inner">
+    <p class="label">05 — Contact</p>
+    <h2 class="section-title">Let's connect.</h2>
+    <p class="contact-body">Open to internships, collaborations, and conversations about web or game development. Reach out any time.</p>
+    <div class="contact-links">
+      <a href="mailto:drakeardina@gmail.com" class="contact-link">
+        <span>Email</span>
+        <span class="contact-value">drakeardina@gmail.com</span>
+      </a>
+      <a href="#" class="contact-link">
+        <span>GitHub</span>
+        <span class="contact-value">github.com/Dichlorobenzyl</span>
+      </a>
+      <a href="#" class="contact-link">
+        <span>LinkedIn</span>
+        <span class="contact-value">linkedin.com/in/drake-ezekiel-ardina-06417231a/</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Built by Zeke — Cavite State University, College of Engineering and Information Technology.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
