@@ -689,7 +689,7 @@ let audioUnlocked = false;
 let musicVolume = 0.5;
 let soundVolume = 0.7;
 let musicFadeToken = 0;
-const musicFadeDuration = 1400;
+const musicFadeDuration = 850;
 
 function createMusicTrack(file) {
   const track = new Audio(encodeURI(`./${file}`));
@@ -719,8 +719,9 @@ function setTrackVolume(track, amount) {
   track.volume = Math.max(0, Math.min(1, amount));
 }
 
-function fadeTrack(track, fromVolume, toVolume, duration, token, onDone) {
+function fadeTrack(track, fromVolume, toVolume, token, onDone) {
   const startTime = performance.now();
+  const duration = musicFadeDuration;
 
   function step(now) {
     if (token !== musicFadeToken) return;
@@ -792,7 +793,7 @@ function playMusic(key) {
   }
 
   if (previousTrack && previousTrack !== nextTrack && !previousTrack.paused) {
-    fadeTrack(previousTrack, previousTrack.volume, 0, musicFadeDuration, token, () => {
+    fadeTrack(previousTrack, previousTrack.volume, 0, token, () => {
       if (token !== musicFadeToken) return;
       if (currentMusicKey !== previousKey) {
         stopMusic(previousTrack);
@@ -800,7 +801,7 @@ function playMusic(key) {
     });
   }
 
-  fadeTrack(nextTrack, 0, musicVolume, musicFadeDuration, token);
+  fadeTrack(nextTrack, 0, musicVolume, token);
 }
 
 function syncMusicPlayback() {
@@ -812,7 +813,7 @@ function syncMusicPlayback() {
       const fadingTrack = musicTracks[currentMusicKey];
       const token = ++musicFadeToken;
       currentMusicKey = null;
-      fadeTrack(fadingTrack, fadingTrack.volume, 0, musicFadeDuration, token, () => {
+      fadeTrack(fadingTrack, fadingTrack.volume, 0, token, () => {
         if (token !== musicFadeToken) return;
         stopMusic(fadingTrack);
       });
