@@ -688,6 +688,8 @@ let currentMusicKey = null;
 let audioUnlocked = false;
 let musicVolume = 0.5;
 let soundVolume = 0.7;
+let musicFadeToken = 0;
+const musicFadeDuration = 1400;
 
 function createMusicTrack(file) {
   const track = new Audio(encodeURI(`./${file}`));
@@ -713,12 +715,29 @@ function stopMusic(track) {
   track.currentTime = 0;
 }
 
-function stopAllMusic(exceptKey = null) {
-  Object.entries(musicTracks).forEach(([key, track]) => {
-    if (key !== exceptKey) {
-      stopMusic(track);
+function setTrackVolume(track, amount) {
+  track.volume = Math.max(0, Math.min(1, amount));
+}
+
+function fadeTrack(track, fromVolume, toVolume, duration, token, onDone) {
+  const startTime = performance.now();
+
+  function step(now) {
+    if (token !== musicFadeToken) return;
+
+    const progress = Math.min(1, (now - startTime) / duration);
+    const volume = fromVolume + ((toVolume - fromVolume) * progress);
+    setTrackVolume(track, volume);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+      return;
     }
-  });
+
+    if (onDone) onDone();
+  }
+
+  requestAnimationFrame(step);
 }
 
 function shouldPlaySituationalMusic() {
@@ -748,13 +767,22 @@ function playMusic(key) {
   if (!key) return;
 
   const track = musicTracks[key];
-  if (currentMusicKey === key && !track.paused) return;
+  if (currentMusicKey === key && !track.paused) {
+    setTrackVolume(track, musicVolume);
+    return;
+  }
 
-  stopAllMusic(key);
-  track.volume = musicVolume;
+  const previousKey = currentMusicKey;
+  const previousTrack = previousKey ? musicTracks[previousKey] : null;
+  const nextTrack = track;
+  const token = ++musicFadeToken;
+
   currentMusicKey = key;
 
-  const playPromise = track.play();
+  nextTrack.currentTime = 0;
+  setTrackVolume(nextTrack, 0);
+
+  const playPromise = nextTrack.play();
   if (playPromise && typeof playPromise.catch === 'function') {
     playPromise.catch(() => {
       if (currentMusicKey === key) {
@@ -762,6 +790,17 @@ function playMusic(key) {
       }
     });
   }
+
+  if (previousTrack && previousTrack !== nextTrack && !previousTrack.paused) {
+    fadeTrack(previousTrack, previousTrack.volume, 0, musicFadeDuration, token, () => {
+      if (token !== musicFadeToken) return;
+      if (currentMusicKey !== previousKey) {
+        stopMusic(previousTrack);
+      }
+    });
+  }
+
+  fadeTrack(nextTrack, 0, musicVolume, musicFadeDuration, token);
 }
 
 function syncMusicPlayback() {
@@ -769,8 +808,21 @@ function syncMusicPlayback() {
 
   const desiredKey = getDesiredMusicKey();
   if (!desiredKey) {
-    currentMusicKey = null;
-    stopAllMusic();
+    if (currentMusicKey) {
+      const fadingTrack = musicTracks[currentMusicKey];
+      const token = ++musicFadeToken;
+      currentMusicKey = null;
+      fadeTrack(fadingTrack, fadingTrack.volume, 0, musicFadeDuration, token, () => {
+        if (token !== musicFadeToken) return;
+        stopMusic(fadingTrack);
+      });
+    }
+    return;
+  }
+
+  const activeTrack = musicTracks[currentMusicKey];
+  if (currentMusicKey === desiredKey && activeTrack && !activeTrack.paused) {
+    setTrackVolume(activeTrack, musicVolume);
     return;
   }
 
