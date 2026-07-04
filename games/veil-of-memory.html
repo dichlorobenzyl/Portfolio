@@ -745,8 +745,7 @@ function shouldPlaySituationalMusic() {
   const playerOne = gameState.players[1];
   const playerTwo = gameState.players[2];
   const lowHealth = Math.min(playerOne.hp, playerTwo.hp) <= 50;
-  const scoreGap = Math.abs(playerOne.score - playerTwo.score) >= 50;
-  return gameState.gameStarted && !gameState.gameOver && (lowHealth || scoreGap);
+  return gameState.gameStarted && !gameState.gameOver && lowHealth;
 }
 
 function getDesiredMusicKey() {
