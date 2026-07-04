@@ -266,6 +266,7 @@
   }
   .tab-text{
     min-width:0;
+    flex:1;
     display:flex;
     flex-direction:column;
     gap:2px;
@@ -281,7 +282,7 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    max-width: 92px;
+    width: 100%;
   }
   .empty-spine{
     padding: 18px 14px;
@@ -452,7 +453,7 @@
     .entry-list{ display:flex; overflow-x:auto; overflow-y:visible; padding: 6px 10px 14px; }
     .entry-tab{ flex-direction:column; align-items:flex-start; border-left:none; border-bottom: 3px solid transparent; min-width: 130px; }
     .entry-tab.active{ border-bottom-color: var(--rust); }
-    .tab-preview{ max-width: 100px; }
+    .tab-preview{ width: 100%; }
     .page{ padding: 22px 20px 28px; }
   }
 
