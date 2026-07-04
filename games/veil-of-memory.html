@@ -676,7 +676,8 @@ const musicFiles = {
   menu: 'Start Menu BGM.mp3',
   selection: 'Audio 3.mp3',
   match: 'Audio 4.mp3',
-  situational: 'Audio 5.mp3'
+  situational: 'Audio 5.mp3',
+  gameOver: 'Audio 6.mp3'
 };
 
 const musicTracks = Object.fromEntries(
@@ -756,8 +757,9 @@ function getDesiredMusicKey() {
     case 'characterSelection':
       return 'selection';
     case 'gameScene':
-    case 'gameOver':
       return shouldPlaySituationalMusic() ? 'situational' : 'match';
+    case 'gameOver':
+      return 'gameOver';
     default:
       return null;
   }
