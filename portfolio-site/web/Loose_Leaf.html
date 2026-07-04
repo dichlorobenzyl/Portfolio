@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Loose Leaf</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --ink:#232620;
+    --ink-soft:#3b3f35;
+    --paper:#EDE6D3;
+    --paper-dark:#DED2AE;
+    --rust:#9C4A38;
+    --moss:#5B6B4F;
+    --dusk:#4B5570;
+    --gold:#B8862E;
+    --gray:#726C5E;
+    --line: rgba(35,38,32,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background: var(--ink);
+    background-image:
+      radial-gradient(ellipse at 20% -10%, rgba(184,134,46,0.10), transparent 55%),
+      radial-gradient(ellipse at 90% 110%, rgba(75,85,112,0.14), transparent 50%);
+    font-family:'Lora', serif;
+    color: var(--ink);
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding: 40px 16px;
+  }
+
+  .app{
+    width:100%;
+    max-width: 980px;
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.25);
+    overflow:hidden;
+    min-height: 640px;
+    position:relative;
+  }
+  .app::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:0.5;
+    mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ---------- AUTH SCREEN ---------- */
+  .auth-wrap{
+    width:100%;
+    max-width: 380px;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.25);
+    padding: 36px 32px;
+    position:relative;
+  }
+  .auth-brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 1.7rem;
+    margin: 0 0 4px;
+  }
+  .auth-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 26px;
+  }
+  .field{
+    margin-bottom: 14px;
+  }
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .field input{
+    width:100%;
+    padding: 10px 11px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.35);
+    font-family:'Lora', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    outline:none;
+  }
+  .field input:focus{ border-color: var(--ink-soft); }
+  .auth-submit{
+    width:100%;
+    padding: 11px;
+    margin-top: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    border:none;
+    border-radius: 2px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor:pointer;
+  }
+  .auth-submit:hover{ background: var(--ink-soft); }
+  .auth-submit:disabled{ opacity:0.4; cursor:not-allowed; }
+  .auth-toggle{
+    margin-top: 16px;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gray);
+  }
+  .auth-toggle button{
+    background:none; border:none; padding:0;
+    color: var(--rust);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:inherit;
+  }
+  .auth-msg{
+    margin-top: 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    line-height:1.5;
+    padding: 10px 12px;
+    border-radius: 2px;
+  }
+  .auth-msg.error{ background: rgba(156,74,56,0.12); color: var(--rust); }
+  .auth-msg.info{ background: rgba(91,107,79,0.12); color: var(--moss); }
+
+  .setup-notice{
+    max-width: 480px;
+    background: var(--paper);
+    border-radius: 3px;
+    padding: 30px 32px;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.55);
+    font-family:'Lora', serif;
+    line-height:1.7;
+  }
+  .setup-notice h2{ font-family:'Fraunces', serif; margin-top:0; }
+  .setup-notice code{
+    background: var(--paper-dark);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.85em;
+  }
+
+  /* ---------- SPINE ---------- */
+  .spine{
+    background: var(--paper-dark);
+    border-right: 1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    z-index:1;
+  }
+  .spine-head{
+    padding: 22px 18px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+    margin:0;
+  }
+  .brand-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+  .account-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top: 10px;
+  }
+  .account-email{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--gray);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    max-width: 130px;
+  }
+  .signout-btn{
+    background:none; border:none; padding:0;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--rust);
+    text-decoration:underline;
+    text-underline-offset:2px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .new-page-btn{
+    margin: 14px 18px;
+    padding: 10px 12px;
+    background: var(--ink);
+    color: var(--paper);
+    border:none;
+    border-radius: 2px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor:pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .new-page-btn:hover{ background: var(--ink-soft); }
+  .new-page-btn:active{ transform: scale(0.97); }
+  .new-page-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .entry-list{
+    flex:1;
+    overflow-y:auto;
+    padding: 4px 0 18px;
+  }
+  .entry-tab{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 11px 18px;
+    cursor:pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+  .entry-tab:hover{ background: rgba(35,38,32,0.05); }
+  .entry-tab.active{
+    background: var(--paper);
+    border-left-color: var(--rust);
+  }
+  .dot{
+    width:9px; height:9px; border-radius:50%;
+    flex-shrink:0;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+  }
+  .tab-text{ min-width:0; }
+  .tab-date{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+  }
+  .tab-preview{
+    font-size: 0.78rem;
+    color: var(--gray);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width: 150px;
+  }
+  .empty-spine{
+    padding: 20px 18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gray);
+    line-height:1.6;
+  }
+
+  /* ---------- MAIN PAGE ---------- */
+  .page{
+    position:relative;
+    z-index:1;
+    padding: 28px 40px 36px;
+    display:flex;
+    flex-direction:column;
+    min-height: 640px;
+  }
+  .page-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+  .page-no{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--gray);
+  }
+  .page-date{
+    font-family:'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .stamp{
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color: var(--paper);
+    transform: rotate(-8deg);
+    filter: url(#roughen);
+    text-align:center;
+    line-height:1.1;
+    flex-shrink:0;
+  }
+
+  .mood-row{
+    display:flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .mood-btn{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding: 7px 12px 7px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: transparent;
+    cursor:pointer;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+  .mood-btn .swatch{
+    width:11px;height:11px;border-radius:50%;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+  }
+  .mood-btn.selected{
+    background: rgba(35,38,32,0.06);
+    border-color: var(--ink-soft);
+  }
+
+  textarea.entry-input{
+    flex:1;
+    min-height: 300px;
+    resize: vertical;
+    border:none;
+    background: transparent;
+    font-family:'Lora', serif;
+    font-size: 1.06rem;
+    line-height: 1.9;
+    color: var(--ink);
+    outline:none;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent, transparent 37px, var(--line) 38px
+    );
+    padding-top: 6px;
+  }
+  textarea.entry-input::placeholder{ color: var(--gray); font-style: italic; }
+
+  .entry-display{
+    flex:1;
+    font-family:'Lora', serif;
+    font-size: 1.06rem;
+    line-height: 1.9;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .page-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .save-btn{
+    padding: 11px 22px;
+    background: var(--ink);
+    color: var(--paper);
+    border:none;
+    border-radius: 2px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor:pointer;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  }
+  .save-btn:hover{ background: var(--ink-soft); }
+  .save-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .save-btn:active:not(:disabled){ transform: scale(0.97); }
+
+  .tear-btn{
+    background:none; border:none; padding:0;
+    color: var(--gray);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    cursor:pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .tear-btn:hover{ color: var(--rust); }
+
+  .word-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--gray);
+  }
+  .sync-status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--gray);
+  }
+
+  @media (max-width: 720px){
+    body{ padding: 0; }
+    .app{ grid-template-columns: 1fr; border-radius:0; min-height:100vh; }
+    .spine{ border-right:none; border-bottom: 1px solid var(--line); }
+    .entry-list{ display:flex; overflow-x:auto; overflow-y:visible; padding: 6px 10px 14px; }
+    .entry-tab{ flex-direction:column; align-items:flex-start; border-left:none; border-bottom: 3px solid transparent; min-width: 130px; }
+    .entry-tab.active{ border-bottom-color: var(--rust); }
+    .tab-preview{ max-width: 120px; }
+    .page{ padding: 22px 20px 28px; }
+  }
+
+  ::-webkit-scrollbar{ width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb{ background: rgba(35,38,32,0.2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="roughen">
+    <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="7" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="6"/>
+  </filter>
+</svg>
+
+<div id="root"></div>
+
+<script>
+// ====================== CONFIGURE THIS ======================
+// Paste your Supabase project URL and anon (public) key here.
+// See SETUP.md for step-by-step instructions.
+const SUPABASE_URL = 'https://qklwcnfctdcliwdkovcp.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_zxVNl_nvf4MDPwlt_j86sw_4zeCTobd';
+// ==============================================================
+
+const root = document.getElementById('root');
+const MOODS = {
+  rant:   { label: 'Rant',    color: '#9C4A38' },
+  heavy:  { label: 'Heavy',   color: '#4B5570' },
+  calm:   { label: 'Calm',    color: '#5B6B4F' },
+  bright: { label: 'Bright',  color: '#B8862E' },
+  plain:  { label: 'Plain',   color: '#726C5E' }
+};
+
+const NOT_CONFIGURED = SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY';
+
+if(NOT_CONFIGURED){
+  root.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+      <div class="setup-notice">
+        <h2>One setup step left</h2>
+        <p>This copy of Loose&nbsp;Leaf isn't connected to a database yet, so it can't save or sync anything.</p>
+        <p>Open <code>SETUP.md</code> (in the same folder) and follow the steps to create a free Supabase project, then paste your project URL and anon key into the <code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code> constants near the top of this file's script tag.</p>
+        <p>Once that's done, reload this page.</p>
+      </div>
+    </div>
+  `;
+} else {
+  runApp();
+}
+
+function runApp(){
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let session = null;
+  let entries = [];
+  let activeId = null;
+  let draftMood = 'plain';
+  let currentDraftText = '';
+  let authMode = 'signin'; // 'signin' | 'signup'
+  let realtimeChannel = null;
+
+  sb.auth.getSession().then(({ data }) => {
+    session = data.session;
+    render();
+  });
+  sb.auth.onAuthStateChange((_event, newSession) => {
+    session = newSession;
+    entries = [];
+    if(!newSession && realtimeChannel){
+      sb.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+    render();
+  });
+
+  function subscribeRealtime(){
+    if(realtimeChannel){
+      sb.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+    realtimeChannel = sb
+      .channel('entries-' + session.user.id)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'entries', filter: `user_id=eq.${session.user.id}` },
+        handleRealtimeChange
+      )
+      .subscribe();
+  }
+
+  function toEntry(row){
+    return {
+      id: row.id,
+      text: row.content,
+      mood: row.mood,
+      createdAt: new Date(row.created_at).getTime()
+    };
+  }
+
+  function handleRealtimeChange(payload){
+    if(payload.eventType === 'INSERT'){
+      if(entries.some(e => e.id === payload.new.id)) return; // already added locally
+      entries.unshift(toEntry(payload.new));
+      entries.sort((a,b) => b.createdAt - a.createdAt);
+      renderList();
+    } else if(payload.eventType === 'UPDATE'){
+      const idx = entries.findIndex(e => e.id === payload.new.id);
+      if(idx === -1) return;
+      entries[idx] = toEntry(payload.new);
+      renderList();
+      if(activeId === payload.new.id){
+        renderReader(entries[idx]);
+      }
+    } else if(payload.eventType === 'DELETE'){
+      const wasActive = activeId === payload.old.id;
+      entries = entries.filter(e => e.id !== payload.old.id);
+      renderList();
+      if(wasActive){
+        renderComposer();
+      }
+    }
+  }
+
+  function render(){
+    if(!session){
+      renderAuthScreen();
+    } else {
+      renderApp();
+    }
+  }
+
+  function renderAuthScreen(msg){
+    root.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.style.minHeight = '100vh';
+    wrap.style.display = 'flex';
+    wrap.style.alignItems = 'center';
+    wrap.style.justifyContent = 'center';
+
+    const card = document.createElement('div');
+    card.className = 'auth-wrap';
+    card.innerHTML = `
+      <p class="auth-brand">Loose&nbsp;Leaf</p>
+      <div class="auth-sub">${authMode === 'signin' ? 'Sign in to your pages' : 'Create your journal'}</div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="authEmail" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="authPassword" autocomplete="${authMode === 'signin' ? 'current-password' : 'new-password'}" />
+      </div>
+      <button class="auth-submit" id="authSubmit">${authMode === 'signin' ? 'Sign in' : 'Create account'}</button>
+      <div class="auth-toggle">
+        ${authMode === 'signin'
+          ? `New here? <button id="toggleMode">Create an account</button>`
+          : `Already have one? <button id="toggleMode">Sign in</button>`}
+      </div>
+      <div id="authMsgSlot"></div>
+    `;
+    wrap.appendChild(card);
+    root.appendChild(wrap);
+
+    if(msg){
+      const m = document.createElement('div');
+      m.className = 'auth-msg ' + msg.type;
+      m.textContent = msg.text;
+      card.querySelector('#authMsgSlot').appendChild(m);
+    }
+
+    card.querySelector('#toggleMode').addEventListener('click', () => {
+      authMode = authMode === 'signin' ? 'signup' : 'signin';
+      renderAuthScreen();
+    });
+
+    const submitBtn = card.querySelector('#authSubmit');
+    submitBtn.addEventListener('click', async () => {
+      const email = card.querySelector('#authEmail').value.trim();
+      const password = card.querySelector('#authPassword').value;
+      if(!email || !password){
+        renderAuthScreen({ type: 'error', text: 'Enter both an email and a password.' });
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Working…';
+      if(authMode === 'signin'){
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if(error){ renderAuthScreen({ type: 'error', text: error.message }); return; }
+      } else {
+        const { error } = await sb.auth.signUp({ email, password });
+        if(error){ renderAuthScreen({ type: 'error', text: error.message }); return; }
+        renderAuthScreen({ type: 'info', text: 'Account created. Check your email if confirmation is required, then sign in.' });
+        return;
+      }
+    });
+  }
+
+  async function loadEntries(){
+    const { data, error } = await sb
+      .from('entries')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if(error){
+      console.error(error);
+      entries = [];
+      return;
+    }
+    entries = data.map(row => ({
+      id: row.id,
+      text: row.content,
+      mood: row.mood,
+      createdAt: new Date(row.created_at).getTime()
+    }));
+  }
+
+  function fmtDate(ts){
+    return new Date(ts).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  }
+  function fmtShort(ts){
+    return new Date(ts).toLocaleDateString(undefined, { month:'short', day:'numeric' });
+  }
+  function pageNumber(id){
+    const idx = entries.findIndex(e => e.id === id);
+    return String(entries.length - idx).padStart(3,'0');
+  }
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function renderApp(){
+    root.innerHTML = `
+      <div class="app" id="appEl">
+        <div class="spine">
+          <div class="spine-head">
+            <p class="brand">Loose&nbsp;Leaf</p>
+            <div class="brand-sub" id="entryCount">Loading…</div>
+            <div class="account-row">
+              <span class="account-email">${escapeHtml(session.user.email)}</span>
+              <button class="signout-btn" id="signOutBtn">Sign out</button>
+            </div>
+          </div>
+          <button class="new-page-btn" id="newPageBtn" disabled>+ Start a new page</button>
+          <div class="entry-list" id="entryList"><div class="empty-spine">Fetching your pages…</div></div>
+        </div>
+        <div class="page" id="pageView"></div>
+      </div>
+    `;
+
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+      await sb.auth.signOut();
+    });
+    const newPageBtn = document.getElementById('newPageBtn');
+    newPageBtn.addEventListener('click', () => {
+      currentDraftText = '';
+      draftMood = 'plain';
+      renderComposer();
+    });
+
+    await loadEntries();
+    newPageBtn.disabled = false;
+    renderList();
+    renderComposer();
+    subscribeRealtime();
+  }
+
+  function renderList(){
+    const entryList = document.getElementById('entryList');
+    const entryCountEl = document.getElementById('entryCount');
+    if(!entryList) return;
+    entryCountEl.textContent = entries.length + (entries.length === 1 ? ' page kept' : ' pages kept');
+    if(entries.length === 0){
+      entryList.innerHTML = '<div class="empty-spine">Nothing written yet.<br>The first page is waiting.</div>';
+      return;
+    }
+    entryList.innerHTML = '';
+    entries.forEach(entry => {
+      const tab = document.createElement('div');
+      tab.className = 'entry-tab' + (entry.id === activeId ? ' active' : '');
+      const mood = MOODS[entry.mood] || MOODS.plain;
+      tab.innerHTML = `
+        <span class="dot" style="background:${mood.color}"></span>
+        <div class="tab-text">
+          <div class="tab-date">${fmtShort(entry.createdAt)}</div>
+          <div class="tab-preview">${escapeHtml((entry.text || '').slice(0,40) || 'Untitled page')}</div>
+        </div>
+      `;
+      tab.addEventListener('click', () => {
+        activeId = entry.id;
+        renderList();
+        renderReader(entry);
+      });
+      entryList.appendChild(tab);
+    });
+  }
+
+  function renderComposer(){
+    activeId = null;
+    renderList();
+    const pageView = document.getElementById('pageView');
+    const today = Date.now();
+    const nextNo = String(entries.length + 1).padStart(3,'0');
+
+    pageView.innerHTML = '';
+    const head = document.createElement('div');
+    head.className = 'page-head';
+    head.innerHTML = `
+      <div>
+        <div class="page-no">No. ${nextNo}</div>
+        <div class="page-date">${fmtDate(today)}</div>
+      </div>
+      <div class="stamp" style="background:${MOODS[draftMood].color}">${MOODS[draftMood].label}</div>
+    `;
+    pageView.appendChild(head);
+
+    const moodRow = document.createElement('div');
+    moodRow.className = 'mood-row';
+    Object.keys(MOODS).forEach(key => {
+      const m = MOODS[key];
+      const btn = document.createElement('button');
+      btn.className = 'mood-btn' + (key === draftMood ? ' selected' : '');
+      btn.innerHTML = `<span class="swatch" style="background:${m.color}"></span>${m.label}`;
+      btn.addEventListener('click', () => {
+        draftMood = key;
+        renderComposer();
+      });
+      moodRow.appendChild(btn);
+    });
+    pageView.appendChild(moodRow);
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'entry-input';
+    textarea.placeholder = "Whatever's sitting heavy, whatever's loud today — put it here. No one else reads this page.";
+    textarea.value = currentDraftText;
+    textarea.addEventListener('input', () => {
+      currentDraftText = textarea.value;
+      updateFooter();
+    });
+    pageView.appendChild(textarea);
+
+    const footer = document.createElement('div');
+    footer.className = 'page-footer';
+    footer.innerHTML = `
+      <span class="word-count" id="wordCount">0 words</span>
+      <button class="save-btn" id="saveBtn" disabled>Seal this page</button>
+    `;
+    pageView.appendChild(footer);
+
+    const saveBtn = footer.querySelector('#saveBtn');
+    saveBtn.addEventListener('click', async () => {
+      if(!currentDraftText.trim()) return;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Sealing…';
+      const { data, error } = await sb
+        .from('entries')
+        .insert({ content: currentDraftText.trim(), mood: draftMood })
+        .select()
+        .single();
+      if(error){
+        console.error(error);
+        alert('Could not save this page: ' + error.message);
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Seal this page';
+        return;
+      }
+      const entry = toEntry(data);
+      entries.unshift(entry);
+      currentDraftText = '';
+      draftMood = 'plain';
+      activeId = entry.id;
+      renderList();
+      renderReader(entry);
+    });
+
+    function updateFooter(){
+      const words = currentDraftText.trim() ? currentDraftText.trim().split(/\s+/).length : 0;
+      footer.querySelector('#wordCount').textContent = words + (words === 1 ? ' word' : ' words');
+      saveBtn.disabled = words === 0;
+    }
+    updateFooter();
+    textarea.focus();
+  }
+
+  function renderReader(entry){
+    const pageView = document.getElementById('pageView');
+    const mood = MOODS[entry.mood] || MOODS.plain;
+    pageView.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'page-head';
+    head.innerHTML = `
+      <div>
+        <div class="page-no">No. ${pageNumber(entry.id)}</div>
+        <div class="page-date">${fmtDate(entry.createdAt)}</div>
+      </div>
+      <div class="stamp" style="background:${mood.color}">${mood.label}</div>
+    `;
+    pageView.appendChild(head);
+
+    const display = document.createElement('div');
+    display.className = 'entry-display';
+    display.textContent = entry.text;
+    pageView.appendChild(display);
+
+    const footer = document.createElement('div');
+    footer.className = 'page-footer';
+    const words = entry.text.trim() ? entry.text.trim().split(/\s+/).length : 0;
+    footer.innerHTML = `
+      <span class="word-count">${words} ${words === 1 ? 'word' : 'words'}</span>
+      <span>
+        <button class="tear-btn" id="editBtn" style="margin-right:16px;">Edit this page</button>
+        <button class="tear-btn" id="tearBtn">Tear out this page</button>
+      </span>
+    `;
+    pageView.appendChild(footer);
+
+    footer.querySelector('#editBtn').addEventListener('click', () => {
+      renderEditor(entry);
+    });
+
+    footer.querySelector('#tearBtn').addEventListener('click', async () => {
+      if(!confirm('Tear out this page for good? This cannot be undone.')) return;
+      const { error } = await sb.from('entries').delete().eq('id', entry.id);
+      if(error){ alert('Could not delete: ' + error.message); return; }
+      entries = entries.filter(e => e.id !== entry.id);
+      renderComposer();
+    });
+  }
+
+  function renderEditor(entry){
+    const pageView = document.getElementById('pageView');
+    let editMood = entry.mood;
+    let editText = entry.text;
+    pageView.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'page-head';
+    head.innerHTML = `
+      <div>
+        <div class="page-no">No. ${pageNumber(entry.id)}</div>
+        <div class="page-date">${fmtDate(entry.createdAt)}</div>
+      </div>
+      <div class="stamp" id="editStamp" style="background:${MOODS[editMood].color}">${MOODS[editMood].label}</div>
+    `;
+    pageView.appendChild(head);
+
+    const moodRow = document.createElement('div');
+    moodRow.className = 'mood-row';
+    Object.keys(MOODS).forEach(key => {
+      const m = MOODS[key];
+      const btn = document.createElement('button');
+      btn.className = 'mood-btn' + (key === editMood ? ' selected' : '');
+      btn.innerHTML = `<span class="swatch" style="background:${m.color}"></span>${m.label}`;
+      btn.addEventListener('click', () => {
+        editMood = key;
+        moodRow.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        head.querySelector('#editStamp').style.background = m.color;
+        head.querySelector('#editStamp').textContent = m.label;
+      });
+      moodRow.appendChild(btn);
+    });
+    pageView.appendChild(moodRow);
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'entry-input';
+    textarea.value = editText;
+    textarea.addEventListener('input', () => { editText = textarea.value; });
+    pageView.appendChild(textarea);
+
+    const footer = document.createElement('div');
+    footer.className = 'page-footer';
+    footer.innerHTML = `
+      <button class="tear-btn" id="cancelEditBtn">Cancel</button>
+      <button class="save-btn" id="saveEditBtn">Save changes</button>
+    `;
+    pageView.appendChild(footer);
+
+    footer.querySelector('#cancelEditBtn').addEventListener('click', () => renderReader(entry));
+
+    footer.querySelector('#saveEditBtn').addEventListener('click', async () => {
+      if(!editText.trim()) return;
+      const saveEditBtn = footer.querySelector('#saveEditBtn');
+      saveEditBtn.disabled = true;
+      saveEditBtn.textContent = 'Saving…';
+      const { data, error } = await sb
+        .from('entries')
+        .update({ content: editText.trim(), mood: editMood })
+        .eq('id', entry.id)
+        .select()
+        .single();
+      if(error){
+        alert('Could not save changes: ' + error.message);
+        saveEditBtn.disabled = false;
+        saveEditBtn.textContent = 'Save changes';
+        return;
+      }
+      const updated = toEntry(data);
+      const idx = entries.findIndex(e => e.id === entry.id);
+      if(idx !== -1) entries[idx] = updated;
+      renderList();
+      renderReader(updated);
+    });
+
+    textarea.focus();
+  }
+}
+</script>
+
+</body>
+</html>
