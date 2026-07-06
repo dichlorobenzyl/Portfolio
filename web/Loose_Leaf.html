@@ -247,6 +247,42 @@
   .new-page-btn:active{ transform: scale(0.97); }
   .new-page-btn:disabled{ opacity:0.4; cursor:not-allowed; }
 
+  .install-wrap{
+    margin: 0 14px 10px;
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+  }
+  .install-btn{
+    width:100%;
+    padding: 10px 12px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor:pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .install-btn:hover{
+    background: rgba(35,38,32,0.06);
+    border-color: var(--ink-soft);
+  }
+  .install-btn:disabled{
+    opacity:0.45;
+    cursor:not-allowed;
+  }
+  .install-hint{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    line-height:1.45;
+    color: var(--gray);
+    padding: 0 2px;
+  }
+
   .entry-list{
     flex:1;
     overflow-y:auto;
@@ -769,6 +805,8 @@ function runApp(){
   let currentDraftText = '';
   let authMode = 'signin'; // 'signin' | 'signup'
   let realtimeChannel = null;
+  let installPromptEvent = null;
+  let isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
   sb.auth.getSession().then(({ data }) => {
     session = data.session;
@@ -931,6 +969,29 @@ function runApp(){
     });
   }
 
+  function refreshInstallUI(){
+    const installBtn = document.getElementById('installBtn');
+    const installHint = document.getElementById('installHint');
+    if(!installBtn || !installHint) return;
+
+    if(isInstalled){
+      installBtn.textContent = 'Installed';
+      installBtn.disabled = true;
+      installHint.textContent = 'Loose Leaf is already installed on this device.';
+      return;
+    }
+
+    if(installPromptEvent){
+      installBtn.textContent = 'Install app';
+      installBtn.disabled = false;
+      installHint.textContent = 'Install directly from this screen without opening the browser menu.';
+    } else {
+      installBtn.textContent = 'Install via browser';
+      installBtn.disabled = false;
+      installHint.textContent = 'If no prompt appears, use your browser menu to install Loose Leaf.';
+    }
+  }
+
   async function loadEntries(){
     const { data, error } = await sb
       .from('entries')
@@ -980,6 +1041,10 @@ function runApp(){
             </div>
           </div>
           <button class="new-page-btn" id="newPageBtn" disabled>+ Start a new page</button>
+          <div class="install-wrap">
+            <button class="install-btn" id="installBtn" type="button">Install app</button>
+            <div class="install-hint" id="installHint">Use this to add Loose Leaf to your phone or desktop.</div>
+          </div>
           <div class="mood-filters" id="moodFilters"></div>
           <div class="entry-list" id="entryList"><div class="empty-spine">Fetching your pages…</div></div>
         </div>
@@ -998,11 +1063,32 @@ function runApp(){
       renderComposer();
     });
 
+    const installBtn = document.getElementById('installBtn');
+    installBtn.addEventListener('click', async () => {
+      if(isInstalled) return;
+      if(installPromptEvent){
+        installPromptEvent.prompt();
+        const choice = await installPromptEvent.userChoice;
+        if(choice && choice.outcome === 'accepted'){
+          isInstalled = true;
+        }
+        installPromptEvent = null;
+        refreshInstallUI();
+        return;
+      }
+
+      const installHint = document.getElementById('installHint');
+      if(installHint){
+        installHint.textContent = 'Open your browser menu and choose Install app or Add to Home screen.';
+      }
+    });
+
     await loadEntries();
     newPageBtn.disabled = false;
     renderMoodFilters();
     renderList();
     renderComposer();
+    refreshInstallUI();
     subscribeRealtime();
   }
 
@@ -1359,6 +1445,18 @@ function runApp(){
 
     textarea.focus();
   }
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    installPromptEvent = event;
+    refreshInstallUI();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    isInstalled = true;
+    installPromptEvent = null;
+    refreshInstallUI();
+  });
 }
 
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
