@@ -269,12 +269,33 @@
     flex:1;
     display:flex;
     flex-direction:column;
-    gap:2px;
+    gap:3px;
   }
-  .tab-date{
+  .tab-title{
+    font-family:'Fraunces', serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    line-height:1.2;
+  }
+  .tab-meta{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .tab-badge{
     font-family:'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--ink-soft);
+    font-size: 0.56rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gray);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.25);
   }
   .tab-preview{
     font-size: 0.78rem;
@@ -305,9 +326,14 @@
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
+    gap: 18px;
     border-bottom: 1px solid var(--line);
     padding-bottom: 14px;
     margin-bottom: 22px;
+  }
+  .page-copy{
+    min-width:0;
+    flex:1;
   }
   .page-no{
     font-family:'IBM Plex Mono', monospace;
@@ -315,12 +341,75 @@
     letter-spacing: 0.06em;
     color: var(--gray);
   }
+  .page-title,
+  .entry-title{
+    width:100%;
+    border:none;
+    background:none;
+    outline:none;
+    margin-top: 6px;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 1.45rem;
+    line-height:1.2;
+    color: var(--ink);
+  }
+  .page-title{
+    word-break:break-word;
+  }
+  .entry-title::placeholder{ color: var(--gray); font-style: italic; }
   .page-date{
     font-family:'Fraunces', serif;
     font-style: italic;
     font-size: 1.05rem;
     color: var(--ink);
     margin-top: 2px;
+  }
+  .page-tools{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap: 10px;
+    flex-shrink:0;
+  }
+  .page-actions{
+    display:flex;
+    gap: 8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .icon-btn{
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.3);
+    border-radius: 999px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .icon-btn:hover{
+    background: rgba(35,38,32,0.06);
+    border-color: var(--ink-soft);
+    color: var(--ink);
+  }
+  .icon-btn.active{
+    background: rgba(35,38,32,0.08);
+    border-color: var(--ink-soft);
+    color: var(--ink);
+  }
+  .icon-btn:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+  .page-lock-note{
+    margin-top: 4px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--rust);
   }
   .stamp{
     width: 54px;
@@ -440,6 +529,11 @@
     font-size: 0.68rem;
     color: var(--gray);
   }
+  .entry-locked .entry-input,
+  .entry-locked .entry-title{
+    pointer-events:none;
+    opacity:0.55;
+  }
   .sync-status{
     font-family:'IBM Plex Mono', monospace;
     font-size: 0.62rem;
@@ -471,11 +565,17 @@
     }
     .entry-tab.active{ border-bottom-color: var(--line); background: rgba(35,38,32,0.04); }
     .dot{ width:8px; height:8px; }
-    .tab-text{ gap:1px; }
+    .tab-text{ gap:2px; }
+    .tab-title{ font-size: 0.82rem; }
+    .tab-badge{ font-size: 0.52rem; }
     .tab-preview{ max-width: 18ch; }
     .page{ padding: 16px 14px 20px; min-height:auto; }
-    .page-head{ margin-bottom: 16px; padding-bottom: 10px; }
+    .page-head{ margin-bottom: 16px; padding-bottom: 10px; gap: 12px; }
+    .page-title,
+    .entry-title{ font-size: 1.2rem; }
     .page-date{ font-size: 0.88rem; }
+    .page-actions{ gap: 6px; }
+    .icon-btn{ padding: 5px 8px; font-size: 0.56rem; }
     .mood-row{ gap: 6px; margin-bottom: 12px; }
     .mood-btn{ padding: 6px 8px 6px 6px; font-size: 0.6rem; }
     textarea.entry-input,
@@ -502,11 +602,13 @@
     .account-row{ margin-top: 8px; }
     .account-email{ max-width: 92px; font-size: 0.56rem; }
     .signout-btn{ font-size: 0.56rem; }
-    .tab-date{ font-size: 0.62rem; }
+    .tab-title{ font-size: 0.78rem; }
     .tab-preview{ font-size: 0.68rem; max-width: 14ch; }
     .page{ padding: 14px 12px 18px; }
     .page-no{ font-size: 0.6rem; }
     .page-date{ font-size: 0.82rem; }
+    .page-title,
+    .entry-title{ font-size: 1.08rem; }
     .stamp{ width: 44px; height: 44px; font-size: 0.52rem; }
     .mood-row{ gap: 5px; }
     .mood-btn{ font-size: 0.56rem; padding: 5px 7px 5px 5px; }
@@ -555,6 +657,25 @@ const MOODS = {
 
 const NOT_CONFIGURED = SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY';
 
+function deriveTitle(title, content){
+  const rawTitle = (title || '').trim();
+  if(rawTitle) return rawTitle;
+  const fallbackLine = (content || '')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .find(Boolean);
+  if(fallbackLine) return fallbackLine.slice(0, 80);
+  return 'Untitled page';
+}
+
+function sortEntries(entries){
+  entries.sort((a, b) => {
+    if(a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+    if(a.createdAt !== b.createdAt) return b.createdAt - a.createdAt;
+    return String(a.id).localeCompare(String(b.id));
+  });
+}
+
 if(NOT_CONFIGURED){
   root.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
@@ -577,6 +698,7 @@ function runApp(){
   let entries = [];
   let activeId = null;
   let draftMood = 'plain';
+  let currentDraftTitle = '';
   let currentDraftText = '';
   let authMode = 'signin'; // 'signin' | 'signup'
   let realtimeChannel = null;
@@ -612,25 +734,51 @@ function runApp(){
   function toEntry(row){
     return {
       id: row.id,
+      title: deriveTitle(row.title, row.content),
       text: row.content,
       mood: row.mood,
+      pinned: Boolean(row.pinned),
+      locked: Boolean(row.locked),
       createdAt: new Date(row.created_at).getTime()
     };
+  }
+
+  async function updateEntry(entryId, changes){
+    const { data, error } = await sb
+      .from('entries')
+      .update(changes)
+      .eq('id', entryId)
+      .select()
+      .single();
+    if(error){
+      alert('Could not update this page: ' + error.message);
+      return null;
+    }
+    const updated = toEntry(data);
+    const idx = entries.findIndex(e => e.id === entryId);
+    if(idx !== -1){
+      entries[idx] = updated;
+      sortEntries(entries);
+      renderList();
+    }
+    return updated;
   }
 
   function handleRealtimeChange(payload){
     if(payload.eventType === 'INSERT'){
       if(entries.some(e => e.id === payload.new.id)) return; // already added locally
       entries.unshift(toEntry(payload.new));
-      entries.sort((a,b) => b.createdAt - a.createdAt);
+      sortEntries(entries);
       renderList();
     } else if(payload.eventType === 'UPDATE'){
       const idx = entries.findIndex(e => e.id === payload.new.id);
       if(idx === -1) return;
       entries[idx] = toEntry(payload.new);
+      sortEntries(entries);
       renderList();
       if(activeId === payload.new.id){
-        renderReader(entries[idx]);
+        const updated = entries.find(e => e.id === payload.new.id);
+        if(updated) renderReader(updated);
       }
     } else if(payload.eventType === 'DELETE'){
       const wasActive = activeId === payload.old.id;
@@ -720,18 +868,15 @@ function runApp(){
     const { data, error } = await sb
       .from('entries')
       .select('*')
+      .order('pinned', { ascending: false })
       .order('created_at', { ascending: false });
     if(error){
       console.error(error);
       entries = [];
       return;
     }
-    entries = data.map(row => ({
-      id: row.id,
-      text: row.content,
-      mood: row.mood,
-      createdAt: new Date(row.created_at).getTime()
-    }));
+    entries = data.map(toEntry);
+    sortEntries(entries);
   }
 
   function fmtDate(ts){
@@ -774,6 +919,7 @@ function runApp(){
     });
     const newPageBtn = document.getElementById('newPageBtn');
     newPageBtn.addEventListener('click', () => {
+      currentDraftTitle = '';
       currentDraftText = '';
       draftMood = 'plain';
       renderComposer();
@@ -800,10 +946,14 @@ function runApp(){
       const tab = document.createElement('div');
       tab.className = 'entry-tab' + (entry.id === activeId ? ' active' : '');
       const mood = MOODS[entry.mood] || MOODS.plain;
+      const badges = [];
+      if(entry.pinned) badges.push('<span class="tab-badge">Pinned</span>');
+      if(entry.locked) badges.push('<span class="tab-badge">Locked</span>');
       tab.innerHTML = `
         <span class="dot" style="background:${mood.color}"></span>
         <div class="tab-text">
-          <div class="tab-date">${fmtShort(entry.createdAt)}</div>
+          <div class="tab-title">${escapeHtml(entry.title)}</div>
+          ${badges.length ? `<div class="tab-meta">${badges.join('')}</div>` : ''}
           <div class="tab-preview">${escapeHtml((entry.text || '').slice(0,40) || 'Untitled page')}</div>
         </div>
       `;
@@ -827,13 +977,21 @@ function runApp(){
     const head = document.createElement('div');
     head.className = 'page-head';
     head.innerHTML = `
-      <div>
+      <div class="page-copy">
         <div class="page-no">No. ${nextNo}</div>
+        <input class="entry-title" id="draftTitle" placeholder="Untitled page" value="${escapeHtml(currentDraftTitle)}">
         <div class="page-date">${fmtDate(today)}</div>
       </div>
-      <div class="stamp" style="background:${MOODS[draftMood].color}">${MOODS[draftMood].label}</div>
+      <div class="page-tools">
+        <div class="stamp" style="background:${MOODS[draftMood].color}">${MOODS[draftMood].label}</div>
+      </div>
     `;
     pageView.appendChild(head);
+
+    const draftTitleInput = head.querySelector('#draftTitle');
+    draftTitleInput.addEventListener('input', () => {
+      currentDraftTitle = draftTitleInput.value;
+    });
 
     const moodRow = document.createElement('div');
     moodRow.className = 'mood-row';
@@ -870,12 +1028,18 @@ function runApp(){
 
     const saveBtn = footer.querySelector('#saveBtn');
     saveBtn.addEventListener('click', async () => {
-      if(!currentDraftText.trim()) return;
+      if(!currentDraftText.trim() && !currentDraftTitle.trim()) return;
       saveBtn.disabled = true;
       saveBtn.textContent = 'Sealing…';
       const { data, error } = await sb
         .from('entries')
-        .insert({ content: currentDraftText.trim(), mood: draftMood })
+        .insert({
+          title: deriveTitle(currentDraftTitle, currentDraftText),
+          content: currentDraftText.trim(),
+          mood: draftMood,
+          pinned: false,
+          locked: false
+        })
         .select()
         .single();
       if(error){
@@ -887,6 +1051,8 @@ function runApp(){
       }
       const entry = toEntry(data);
       entries.unshift(entry);
+      sortEntries(entries);
+      currentDraftTitle = '';
       currentDraftText = '';
       draftMood = 'plain';
       activeId = entry.id;
@@ -897,7 +1063,7 @@ function runApp(){
     function updateFooter(){
       const words = currentDraftText.trim() ? currentDraftText.trim().split(/\s+/).length : 0;
       footer.querySelector('#wordCount').textContent = words + (words === 1 ? ' word' : ' words');
-      saveBtn.disabled = words === 0;
+      saveBtn.disabled = words === 0 && !currentDraftTitle.trim();
     }
     updateFooter();
     textarea.focus();
@@ -911,11 +1077,19 @@ function runApp(){
     const head = document.createElement('div');
     head.className = 'page-head';
     head.innerHTML = `
-      <div>
+      <div class="page-copy">
         <div class="page-no">No. ${pageNumber(entry.id)}</div>
+        <div class="page-title">${escapeHtml(entry.title)}</div>
         <div class="page-date">${fmtDate(entry.createdAt)}</div>
+        ${entry.locked ? '<div class="page-lock-note">Locked notes cannot be edited or deleted.</div>' : ''}
       </div>
-      <div class="stamp" style="background:${mood.color}">${mood.label}</div>
+      <div class="page-tools">
+        <div class="page-actions">
+          <button class="icon-btn${entry.pinned ? ' active' : ''}" id="pinBtn">${entry.pinned ? 'Unpin' : 'Pin'}</button>
+          <button class="icon-btn${entry.locked ? ' active' : ''}" id="lockBtn">${entry.locked ? 'Unlock' : 'Lock'}</button>
+        </div>
+        <div class="stamp" style="background:${mood.color}">${mood.label}</div>
+      </div>
     `;
     pageView.appendChild(head);
 
@@ -930,17 +1104,29 @@ function runApp(){
     footer.innerHTML = `
       <span class="word-count">${words} ${words === 1 ? 'word' : 'words'}</span>
       <span>
-        <button class="tear-btn" id="editBtn" style="margin-right:16px;">Edit this page</button>
-        <button class="tear-btn" id="tearBtn">Tear out this page</button>
+        <button class="tear-btn" id="editBtn" style="margin-right:16px;" ${entry.locked ? 'disabled' : ''}>Edit this page</button>
+        <button class="tear-btn" id="tearBtn" ${entry.locked ? 'disabled' : ''}>Tear out this page</button>
       </span>
     `;
     pageView.appendChild(footer);
 
+    head.querySelector('#pinBtn').addEventListener('click', async () => {
+      const updated = await updateEntry(entry.id, { pinned: !entry.pinned });
+      if(updated) renderReader(updated);
+    });
+
+    head.querySelector('#lockBtn').addEventListener('click', async () => {
+      const updated = await updateEntry(entry.id, { locked: !entry.locked });
+      if(updated) renderReader(updated);
+    });
+
     footer.querySelector('#editBtn').addEventListener('click', () => {
+      if(entry.locked) return;
       renderEditor(entry);
     });
 
     footer.querySelector('#tearBtn').addEventListener('click', async () => {
+      if(entry.locked) return;
       if(!confirm('Tear out this page for good? This cannot be undone.')) return;
       const { error } = await sb.from('entries').delete().eq('id', entry.id);
       if(error){ alert('Could not delete: ' + error.message); return; }
@@ -950,21 +1136,34 @@ function runApp(){
   }
 
   function renderEditor(entry){
+    if(entry.locked){
+      renderReader(entry);
+      return;
+    }
     const pageView = document.getElementById('pageView');
     let editMood = entry.mood;
+    let editTitle = entry.title;
     let editText = entry.text;
     pageView.innerHTML = '';
 
     const head = document.createElement('div');
     head.className = 'page-head';
     head.innerHTML = `
-      <div>
+      <div class="page-copy">
         <div class="page-no">No. ${pageNumber(entry.id)}</div>
+        <input class="entry-title" id="editTitle" value="${escapeHtml(editTitle)}">
         <div class="page-date">${fmtDate(entry.createdAt)}</div>
       </div>
-      <div class="stamp" id="editStamp" style="background:${MOODS[editMood].color}">${MOODS[editMood].label}</div>
+      <div class="page-tools">
+        <div class="stamp" id="editStamp" style="background:${MOODS[editMood].color}">${MOODS[editMood].label}</div>
+      </div>
     `;
     pageView.appendChild(head);
+
+    const editTitleInput = head.querySelector('#editTitle');
+    editTitleInput.addEventListener('input', () => {
+      editTitle = editTitleInput.value;
+    });
 
     const moodRow = document.createElement('div');
     moodRow.className = 'mood-row';
@@ -1001,13 +1200,17 @@ function runApp(){
     footer.querySelector('#cancelEditBtn').addEventListener('click', () => renderReader(entry));
 
     footer.querySelector('#saveEditBtn').addEventListener('click', async () => {
-      if(!editText.trim()) return;
+      if(!editText.trim() && !editTitle.trim()) return;
       const saveEditBtn = footer.querySelector('#saveEditBtn');
       saveEditBtn.disabled = true;
       saveEditBtn.textContent = 'Saving…';
       const { data, error } = await sb
         .from('entries')
-        .update({ content: editText.trim(), mood: editMood })
+        .update({
+          title: deriveTitle(editTitle, editText),
+          content: editText.trim(),
+          mood: editMood
+        })
         .eq('id', entry.id)
         .select()
         .single();
