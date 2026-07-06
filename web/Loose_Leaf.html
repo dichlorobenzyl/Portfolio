@@ -450,6 +450,50 @@
     color: var(--ink-soft);
     transition: background 0.12s ease, border-color 0.12s ease;
   }
+  .mood-filters{
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+    margin: 12px 14px 8px;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--line);
+  }
+  .mood-filters-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+  .mood-filter-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 8px;
+  }
+  .mood-filter-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.22);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  .mood-filter-btn.active{
+    background: rgba(35,38,32,0.08);
+    border-color: var(--ink-soft);
+    color: var(--ink);
+  }
+  .mood-filter-count{
+    font-size: 0.55rem;
+    color: var(--gray);
+  }
   .mood-btn .swatch{
     width:11px;height:11px;border-radius:50%;
     box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
@@ -569,6 +613,9 @@
     .tab-title{ font-size: 0.82rem; }
     .tab-badge{ font-size: 0.52rem; }
     .tab-preview{ max-width: 18ch; }
+    .mood-filters{ margin: 10px 12px 6px; padding-top: 10px; gap: 6px; }
+    .mood-filter-row{ gap: 6px; }
+    .mood-filter-btn{ padding: 6px 9px; font-size: 0.58rem; }
     .page{ padding: 16px 14px 20px; min-height:auto; }
     .page-head{ margin-bottom: 16px; padding-bottom: 10px; gap: 12px; }
     .page-title,
@@ -576,8 +623,11 @@
     .page-date{ font-size: 0.88rem; }
     .page-actions{ gap: 6px; }
     .icon-btn{ padding: 5px 8px; font-size: 0.56rem; }
-    .mood-row{ gap: 6px; margin-bottom: 12px; }
+    .mood-section{ gap: 10px; margin-bottom: 12px; padding-top: 8px; }
+    .mood-section-label{ font-size: 0.56rem; padding-top: 7px; }
+    .mood-row{ gap: 6px; }
     .mood-btn{ padding: 6px 8px 6px 6px; font-size: 0.6rem; }
+    .mood-btn + .mood-btn{ margin-left: 8px; padding-left: 14px; }
     textarea.entry-input,
     .entry-display{
       font-size: 0.92rem;
@@ -604,14 +654,19 @@
     .signout-btn{ font-size: 0.56rem; }
     .tab-title{ font-size: 0.78rem; }
     .tab-preview{ font-size: 0.68rem; max-width: 14ch; }
+    .mood-filters{ margin: 8px 10px 4px; }
+    .mood-filter-btn{ padding: 5px 8px; font-size: 0.55rem; }
     .page{ padding: 14px 12px 18px; }
     .page-no{ font-size: 0.6rem; }
     .page-date{ font-size: 0.82rem; }
     .page-title,
     .entry-title{ font-size: 1.08rem; }
     .stamp{ width: 44px; height: 44px; font-size: 0.52rem; }
+    .mood-section{ gap: 8px; margin-bottom: 10px; }
+    .mood-section-label{ font-size: 0.54rem; }
     .mood-row{ gap: 5px; }
     .mood-btn{ font-size: 0.56rem; padding: 5px 7px 5px 5px; }
+    .mood-btn + .mood-btn{ margin-left: 6px; padding-left: 12px; }
     textarea.entry-input,
     .entry-display{ font-size: 0.88rem; line-height: 1.65; }
     textarea.entry-input{
@@ -676,6 +731,10 @@ function sortEntries(entries){
   });
 }
 
+function moodLabelFor(key){
+  return (MOODS[key] && MOODS[key].label) || 'All';
+}
+
 if(NOT_CONFIGURED){
   root.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
@@ -697,6 +756,7 @@ function runApp(){
   let session = null;
   let entries = [];
   let activeId = null;
+  let activeMoodFilter = 'all';
   let draftMood = 'plain';
   let currentDraftTitle = '';
   let currentDraftText = '';
@@ -879,6 +939,11 @@ function runApp(){
     sortEntries(entries);
   }
 
+  function filteredEntries(){
+    if(activeMoodFilter === 'all') return entries;
+    return entries.filter(entry => entry.mood === activeMoodFilter);
+  }
+
   function fmtDate(ts){
     return new Date(ts).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   }
@@ -908,6 +973,7 @@ function runApp(){
             </div>
           </div>
           <button class="new-page-btn" id="newPageBtn" disabled>+ Start a new page</button>
+          <div class="mood-filters" id="moodFilters"></div>
           <div class="entry-list" id="entryList"><div class="empty-spine">Fetching your pages…</div></div>
         </div>
         <div class="page" id="pageView"></div>
@@ -927,22 +993,71 @@ function runApp(){
 
     await loadEntries();
     newPageBtn.disabled = false;
+    renderMoodFilters();
     renderList();
     renderComposer();
     subscribeRealtime();
+  }
+
+  function renderMoodFilters(){
+    const moodFilters = document.getElementById('moodFilters');
+    if(!moodFilters) return;
+    const counts = Object.fromEntries(Object.keys(MOODS).map(key => [key, 0]));
+    entries.forEach(entry => {
+      if(counts[entry.mood] !== undefined) counts[entry.mood] += 1;
+    });
+    const activeCount = filteredEntries().length;
+    moodFilters.innerHTML = `
+      <div class="mood-filters-label">Browse by mood</div>
+      <div class="mood-filter-row">
+        <button class="mood-filter-btn${activeMoodFilter === 'all' ? ' active' : ''}" data-mood="all">All <span class="mood-filter-count">${entries.length}</span></button>
+        ${Object.entries(MOODS).map(([key, mood]) => `
+          <button class="mood-filter-btn${activeMoodFilter === key ? ' active' : ''}" data-mood="${key}">
+            <span class="dot" style="background:${mood.color};width:8px;height:8px"></span>
+            ${mood.label} <span class="mood-filter-count">${counts[key]}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="empty-spine" style="padding:0;color:var(--gray);">
+        ${activeMoodFilter === 'all' ? 'Showing every page.' : `Showing ${activeCount} ${moodLabelFor(activeMoodFilter).toLowerCase()} page${activeCount === 1 ? '' : 's'}.`}
+      </div>
+    `;
+
+    moodFilters.querySelectorAll('.mood-filter-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        activeMoodFilter = button.dataset.mood;
+        if(activeMoodFilter === 'all'){
+          activeId = null;
+          renderComposer();
+        } else {
+          const list = filteredEntries();
+          activeId = list[0] ? list[0].id : null;
+          if(activeId){
+            renderReader(list[0]);
+          } else {
+            renderComposer();
+          }
+        }
+        renderMoodFilters();
+        renderList();
+      });
+    });
   }
 
   function renderList(){
     const entryList = document.getElementById('entryList');
     const entryCountEl = document.getElementById('entryCount');
     if(!entryList) return;
-    entryCountEl.textContent = entries.length + (entries.length === 1 ? ' page kept' : ' pages kept');
-    if(entries.length === 0){
+    const visibleEntries = filteredEntries();
+    entryCountEl.textContent = activeMoodFilter === 'all'
+      ? entries.length + (entries.length === 1 ? ' page kept' : ' pages kept')
+      : visibleEntries.length + ' ' + moodLabelFor(activeMoodFilter).toLowerCase() + (visibleEntries.length === 1 ? ' page kept' : ' pages kept');
+    if(visibleEntries.length === 0){
       entryList.innerHTML = '<div class="empty-spine">Nothing written yet.<br>The first page is waiting.</div>';
       return;
     }
     entryList.innerHTML = '';
-    entries.forEach(entry => {
+    visibleEntries.forEach(entry => {
       const tab = document.createElement('div');
       tab.className = 'entry-tab' + (entry.id === activeId ? ' active' : '');
       const mood = MOODS[entry.mood] || MOODS.plain;
@@ -993,6 +1108,9 @@ function runApp(){
       currentDraftTitle = draftTitleInput.value;
     });
 
+    const moodSection = document.createElement('div');
+    moodSection.className = 'mood-row';
+
     const moodRow = document.createElement('div');
     moodRow.className = 'mood-row';
     Object.keys(MOODS).forEach(key => {
@@ -1006,7 +1124,8 @@ function runApp(){
       });
       moodRow.appendChild(btn);
     });
-    pageView.appendChild(moodRow);
+    moodSection.appendChild(moodRow);
+    pageView.appendChild(moodSection);
 
     const textarea = document.createElement('textarea');
     textarea.className = 'entry-input';
@@ -1165,6 +1284,9 @@ function runApp(){
       editTitle = editTitleInput.value;
     });
 
+    const moodSection = document.createElement('div');
+    moodSection.className = 'mood-row';
+
     const moodRow = document.createElement('div');
     moodRow.className = 'mood-row';
     Object.keys(MOODS).forEach(key => {
@@ -1181,7 +1303,8 @@ function runApp(){
       });
       moodRow.appendChild(btn);
     });
-    pageView.appendChild(moodRow);
+    moodSection.appendChild(moodRow);
+    pageView.appendChild(moodSection);
 
     const textarea = document.createElement('textarea');
     textarea.className = 'entry-input';
