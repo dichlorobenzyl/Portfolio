@@ -1,0 +1,14 @@
+{
+  "name": "Loose Leaf",
+  "short_name": "Loose Leaf",
+  "description": "A private, page-by-page journal.",
+  "start_url": "./Loose_Leaf.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#232620",
+  "theme_color": "#232620",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
